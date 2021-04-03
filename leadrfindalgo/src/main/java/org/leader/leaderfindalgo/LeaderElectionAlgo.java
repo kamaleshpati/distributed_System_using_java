@@ -30,12 +30,25 @@ public class LeaderElectionAlgo implements Watcher {
         }
     }
 
+    public void close(){
+        try {
+            zooKeeper.close();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void process(WatchedEvent watchedEvent) {
         switch (watchedEvent.getType()){
             case None:
                 if(watchedEvent.getState() == Event.KeeperState.SyncConnected){
                     System.out.println("connected to zookeeper");
+                } else {
+                    synchronized (zooKeeper){
+                        System.out.println("disconnection event");
+                        zooKeeper.notifyAll();
+                    }
                 }
         }
 
@@ -45,5 +58,7 @@ public class LeaderElectionAlgo implements Watcher {
         LeaderElectionAlgo leaderElectionAlgo = new LeaderElectionAlgo();
         leaderElectionAlgo.connectZookeeper();
         leaderElectionAlgo.run();
+        leaderElectionAlgo.close();
+        System.out.println("Disconnected from zookeeper");
     }
 }
