@@ -1,6 +1,7 @@
 package org.leader.leaderfindalgo;
 
 import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -52,6 +53,8 @@ public class LeaderElectionAlgo implements Watcher {
                         zooKeeper.notifyAll();
                     }
                 }
+            case NodeDeleted:
+                selectLeader();
         }
 
     }
@@ -71,15 +74,26 @@ public class LeaderElectionAlgo implements Watcher {
 
     public void selectLeader(){
         try {
-            List<String> children = zooKeeper.getChildren(ELECTION_NODE, false);
-            Collections.sort(children);
-            String smallest = children.get(0);
+            String predecessorNode = "";
+            Stat predecessorNodeStat = null;
+            while (predecessorNodeStat == null) {
+                List<String> children = zooKeeper.getChildren(ELECTION_NODE, false);
+                Collections.sort(children);
+                String smallest = children.get(0);
 
-            if( smallest.equals(currZnode)){
-                System.out.println("I am the leader");
-                return;
+                if (smallest.equals(currZnode)) {
+                    System.out.println("I am the leader"+currZnode);
+                    return;
+                } else {
+                    System.out.println("I am not the leader " + smallest + " is leader");
+                    int predecessorIndex = Collections.binarySearch(children, currZnode) - 1;
+                    predecessorNode = children.get(predecessorIndex);
+                    predecessorNodeStat = zooKeeper.exists(ELECTION_NODE + "/" + predecessorNode, this);
+
+
+                }
+                System.out.println("watching " + predecessorNodeStat);
             }
-            System.out.println("I am not the leader " + smallest + " is leader");
         } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
         }
