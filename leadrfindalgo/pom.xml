@@ -38,7 +38,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>org.leader.leaderfindalgo.LeaderElectionAlgo</mainClass>
+                                    <mainClass>org.leader.leaderfindalgo.Main</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

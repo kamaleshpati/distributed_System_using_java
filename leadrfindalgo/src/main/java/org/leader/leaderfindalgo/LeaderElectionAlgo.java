@@ -3,7 +3,6 @@ package org.leader.leaderfindalgo;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,46 +12,18 @@ public class LeaderElectionAlgo implements Watcher {
     private static final String ELECTION_NODE = "/parent";
     private ZooKeeper zooKeeper;
     private String currZnode;
+    private final OnElectionCallback onElectionCallback;
 
-    public void connectZookeeper(){
-        try {
-            this.zooKeeper = new ZooKeeper(ZOOKEEPER_ADDR,SESSION_TIMEOUT,this);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public LeaderElectionAlgo(ZooKeeper zooKeeper, OnElectionCallback onElectionCallback){
+        this.zooKeeper = zooKeeper;
+        this.onElectionCallback = onElectionCallback;
     }
 
-    public void run(){
-        synchronized (zooKeeper){
-            try {
-                zooKeeper.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
-    public void close(){
-        try {
-            zooKeeper.close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public void process(WatchedEvent watchedEvent) {
         switch (watchedEvent.getType()){
-            case None:
-                if(watchedEvent.getState() == Event.KeeperState.SyncConnected){
-                    System.out.println("connected to zookeeper");
-                } else {
-                    synchronized (zooKeeper){
-                        System.out.println("disconnection event");
-                        zooKeeper.notifyAll();
-                    }
-                }
             case NodeDeleted:
                 selectLeader();
         }
@@ -83,6 +54,7 @@ public class LeaderElectionAlgo implements Watcher {
 
                 if (smallest.equals(currZnode)) {
                     System.out.println("I am the leader"+currZnode);
+                    onElectionCallback.onElectedToBe();
                     return;
                 } else {
                     System.out.println("I am not the leader " + smallest + " is leader");
@@ -92,6 +64,7 @@ public class LeaderElectionAlgo implements Watcher {
 
 
                 }
+                onElectionCallback.worker();
                 System.out.println("watching " + predecessorNodeStat);
             }
         } catch (KeeperException | InterruptedException e) {
@@ -100,13 +73,5 @@ public class LeaderElectionAlgo implements Watcher {
 
     }
 
-    public static void main(String[] args) {
-        LeaderElectionAlgo leaderElectionAlgo = new LeaderElectionAlgo();
-        leaderElectionAlgo.connectZookeeper();
-        leaderElectionAlgo.volunteerForElection();
-        leaderElectionAlgo.selectLeader();
-        leaderElectionAlgo.run();
-        leaderElectionAlgo.close();
-        System.out.println("Disconnected from zookeeper");
-    }
+
 }
