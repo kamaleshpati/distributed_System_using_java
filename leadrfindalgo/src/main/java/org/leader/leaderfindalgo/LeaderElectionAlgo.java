@@ -1,15 +1,17 @@
 package org.leader.leaderfindalgo;
 
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class LeaderElectionAlgo implements Watcher {
     private static final String ZOOKEEPER_ADDR = "localhost:2181";
     private static final int SESSION_TIMEOUT = 3000;
+    private static final String ELECTION_NODE = "/parent";
     private ZooKeeper zooKeeper;
+    private String currZnode;
 
     public void connectZookeeper(){
         try {
@@ -54,9 +56,41 @@ public class LeaderElectionAlgo implements Watcher {
 
     }
 
+    public void volunteerForElection(){
+        String znodePrefix = ELECTION_NODE + "/c_";
+        try {
+            String znodeFullpath = zooKeeper.create(znodePrefix, new byte[]{}, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+            System.out.println("znode name" + znodeFullpath);
+            this.currZnode = znodeFullpath.replace(ELECTION_NODE+"/", "");
+
+        } catch (KeeperException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void selectLeader(){
+        try {
+            List<String> children = zooKeeper.getChildren(ELECTION_NODE, false);
+            Collections.sort(children);
+            String smallest = children.get(0);
+
+            if( smallest.equals(currZnode)){
+                System.out.println("I am the leader");
+                return;
+            }
+            System.out.println("I am not the leader " + smallest + " is leader");
+        } catch (KeeperException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void main(String[] args) {
         LeaderElectionAlgo leaderElectionAlgo = new LeaderElectionAlgo();
         leaderElectionAlgo.connectZookeeper();
+        leaderElectionAlgo.volunteerForElection();
+        leaderElectionAlgo.selectLeader();
         leaderElectionAlgo.run();
         leaderElectionAlgo.close();
         System.out.println("Disconnected from zookeeper");
