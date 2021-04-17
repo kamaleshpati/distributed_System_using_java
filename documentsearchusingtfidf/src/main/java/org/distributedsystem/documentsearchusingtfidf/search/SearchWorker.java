@@ -1,9 +1,9 @@
 package org.distributedsystem.documentsearchusingtfidf.search;
 
-import org.distributedsystem.documentsearchusingtfidf.models.DocData;
-import org.distributedsystem.documentsearchusingtfidf.models.Result;
-import org.distributedsystem.documentsearchusingtfidf.models.SerializationUtils;
-import org.distributedsystem.documentsearchusingtfidf.models.Task;
+import org.distributedsystem.documentsearchusingtfidf.model.DocData;
+import org.distributedsystem.documentsearchusingtfidf.model.Result;
+import org.distributedsystem.documentsearchusingtfidf.model.SerializationUtils;
+import org.distributedsystem.documentsearchusingtfidf.model.Task;
 import org.distributedsystem.documentsearchusingtfidf.networksevices.OnRequestCallback;
 
 import java.io.*;

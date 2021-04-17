@@ -1,4 +1,4 @@
-package org.distributedsystem.documentsearchusingtfidf.networksevices;
+package org.distributed.frontenddistributed.networking;
 
 import java.io.BufferedReader;
 import java.io.IOException;

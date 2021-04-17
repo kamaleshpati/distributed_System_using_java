@@ -1,10 +1,9 @@
 package org.distributedsystem.documentsearchusingtfidf;
 
-import org.distributedsystem.documentsearchusingtfidf.models.DocData;
+import org.distributedsystem.documentsearchusingtfidf.model.DocData;
 import org.distributedsystem.documentsearchusingtfidf.search.TFIDF;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 

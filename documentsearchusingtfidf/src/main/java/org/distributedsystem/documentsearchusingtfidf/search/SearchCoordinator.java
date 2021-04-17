@@ -3,10 +3,11 @@ package org.distributedsystem.documentsearchusingtfidf.search;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.zookeeper.KeeperException;
 import org.distributedsystem.documentsearchusingtfidf.cluster.ServiceRegistry;
-import org.distributedsystem.documentsearchusingtfidf.models.DocData;
-import org.distributedsystem.documentsearchusingtfidf.models.Result;
-import org.distributedsystem.documentsearchusingtfidf.models.SerializationUtils;
-import org.distributedsystem.documentsearchusingtfidf.models.Task;
+import org.distributedsystem.documentsearchusingtfidf.model.DocData;
+import org.distributedsystem.documentsearchusingtfidf.model.Result;
+import org.distributedsystem.documentsearchusingtfidf.model.SerializationUtils;
+import org.distributedsystem.documentsearchusingtfidf.model.Task;
+import org.distributedsystem.documentsearchusingtfidf.model.proto.SearchModel;
 import org.distributedsystem.documentsearchusingtfidf.networksevices.OnRequestCallback;
 import org.distributedsystem.documentsearchusingtfidf.networksevices.WebClient;
 
@@ -30,7 +31,7 @@ public class SearchCoordinator implements OnRequestCallback {
         this.documents = readDocumentsList();
     }
 
-    public byte[] handleRequest(byte[] requestPayload) {
+    public byte[] handleRequest(byte[] requestPayload) throws IOException {
         try {
             SearchModel.Request request = SearchModel.Request.parseFrom(requestPayload);
             SearchModel.Response response = createResponse(request);
@@ -47,7 +48,7 @@ public class SearchCoordinator implements OnRequestCallback {
         return ENDPOINT;
     }
 
-    private SearchModel.Response createResponse(SearchModel.Request searchRequest) throws KeeperException, InterruptedException, KeeperException {
+    private SearchModel.Response createResponse(SearchModel.Request searchRequest) throws KeeperException, InterruptedException, KeeperException, IOException {
         SearchModel.Response.Builder searchResponse = SearchModel.Response.newBuilder();
 
         System.out.println("Received search query: " + searchRequest.getSearchQuery());
@@ -120,10 +121,10 @@ public class SearchCoordinator implements OnRequestCallback {
             try {
                 Result result = (Result) future.get();
                 results.add(result);
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException | ExecutionException ignored) {
             }
         }
-        System.out.println(String.format("Received %d/%d results", results.size(), tasks.size()));
+        System.out.printf("Received %d/%d results%n", results.size(), tasks.size());
         return results;
     }
 

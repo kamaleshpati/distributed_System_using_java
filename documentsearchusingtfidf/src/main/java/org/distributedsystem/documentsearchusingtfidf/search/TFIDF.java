@@ -1,6 +1,6 @@
 package org.distributedsystem.documentsearchusingtfidf.search;
 
-import org.distributedsystem.documentsearchusingtfidf.models.DocData;
+import org.distributedsystem.documentsearchusingtfidf.model.DocData;
 
 import java.util.*;
 
