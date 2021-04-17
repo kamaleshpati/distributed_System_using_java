@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class SequentialSearch {
     public static final String  BOOKS_DIR = "books";
-    public static String searchQuery1 = "The best Detective that catches many criminals";
+    public static String searchQuery1 = "Alice in wonderland";
 
     public static void main(String[] args) throws IOException {
         List<String> resources = getResourceFiles(BOOKS_DIR);
